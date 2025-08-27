@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getTargets, deleteTarget, getTargetHistory } from "../api/targets";
 import AddTargetForm from "../components/AddTargetForm";
 import EditTargetModal from "../components/EditTargetModal";
-import logo from "../assets/Pinger.png";
+import logo from "../assets/neverNap.png";
 
 const Dashboard = () => {
   const { authUser, setAuthUser } = useAuth();
