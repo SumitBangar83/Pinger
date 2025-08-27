@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/useAuth";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
 import { getTargets, deleteTarget, getTargetHistory } from "../api/targets";
 import AddTargetForm from "../components/AddTargetForm";
 import EditTargetModal from "../components/EditTargetModal";
 import logo from "../assets/neverNap.png";
+import { Card, CardContent } from "../components/ui/Card";
+import { Button } from "../components/ui/Button";
+import { motion } from "framer-motion";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { UserCircle } from "lucide-react";
 
 const Dashboard = () => {
   const { authUser, setAuthUser } = useAuth();
@@ -26,7 +31,7 @@ const Dashboard = () => {
         const response = await getTargets();
         setTargets(response.data);
       } catch (err) {
-        setError("Failed to fetch targets.", err);
+        setError("Failed to fetch targets.");
       } finally {
         setLoading(false);
       }
@@ -51,7 +56,6 @@ const Dashboard = () => {
         setTargets((prev) => prev.filter((t) => t._id !== targetId));
         if (selectedTarget?._id === targetId) setSelectedTarget(null);
       } catch (err) {
-        console.error("Delete failed:", err);
         alert("Failed to delete target.");
       }
     }
@@ -85,164 +89,147 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-blue-600 to-indigo-700 text-white font-sans">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-600 text-white">
       {/* HEADER */}
-      <header className="bg-white/10 backdrop-blur-md sticky top-0 z-10 p-4 flex justify-between items-center border-b border-white/20 shadow-lg">
-        <div className="flex items-center gap-3">
-          <img src={logo} alt="Pinger Logo" className="h-10 w-10 rounded-lg" />
-          <h1 className="text-2xl font-bold tracking-wide">Pinger</h1>
-          <Link to="/pinger" className="ml-20 hover:underline text-gray-800"><u>Pinger Page</u></Link>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="text-right hidden sm:block">
-            <p className="font-semibold text-sm">{authUser?.user?.username}</p>
-            <p className="text-xs text-gray-200">{authUser?.user?.email}</p>
+      <header className="sticky top-0 z-20 bg-black/30 backdrop-blur-lg border-b border-white/20 shadow-xl">
+        <div className="max-w-7xl mx-auto flex items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="NeverNap Logo" className="h-10 w-10 rounded-lg" />
+            <h1 className="text-2xl font-bold tracking-wide">NeverNap</h1>
+            <Link to="/pinger" className="ml-10 text-sm text-gray-200 hover:text-white">
+              Pinger Page
+            </Link>
           </div>
-          <button
-            onClick={handleLogout}
-            className="bg-gradient-to-r from-pink-500 to-red-500 hover:opacity-90 text-white font-bold py-2 px-4 rounded-xl transition duration-300 shadow-md"
-          >
-            Logout
-          </button>
+
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:block text-right">
+              <p className="font-semibold text-sm">{authUser?.user?.username}</p>
+              <p className="text-xs text-gray-300">{authUser?.user?.email}</p>
+            </div>
+            <UserCircle className="h-8 w-8 text-gray-300" />
+            <Button onClick={handleLogout} className="bg-red-500 hover:bg-red-600">
+              Logout
+            </Button>
+          </div>
         </div>
       </header>
 
       {/* MAIN */}
-      <main className="p-6 md:p-10">
-        <div className="max-w-7xl mx-auto space-y-12">
-          {/* Add Target Form */}
-          <section className="backdrop-blur-xl bg-white/10 border border-white/20 p-6 rounded-2xl shadow-xl">
-            <AddTargetForm onTargetAdded={handleTargetAdded} />
-          </section>
+      <main className="max-w-7xl mx-auto p-6 md:p-10 space-y-12">
+        {/* Add Target Form */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="backdrop-blur-xl bg-white/10 border border-white/20 p-6 rounded-2xl shadow-xl"
+        >
+          <AddTargetForm onTargetAdded={handleTargetAdded} />
+        </motion.section>
 
-          {/* Targets */}
-          <section>
-            <h2 className="text-3xl font-bold mb-6">Your Monitored Targets</h2>
+        {/* Targets */}
+        <section>
+          <h2 className="text-3xl font-bold mb-6">Your Monitored Targets</h2>
 
-            {!loading && !error && (
-              targets.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {targets.map((target) => (
-                    <div
-                      key={target._id}
-                      onClick={() => handleSelectTarget(target)}
-                      className={`backdrop-blur-lg bg-white/10 border transition-all duration-300 rounded-2xl p-5 shadow-lg cursor-pointer hover:scale-105 ${selectedTarget?._id === target._id
-                        ? "border-blue-400"
-                        : "border-white/20"
+          {loading ? (
+            <p className="text-gray-200">Loading targets...</p>
+          ) : targets.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {targets.map((target) => (
+                <motion.div
+                  key={target._id}
+                  whileHover={{ scale: 1.05 }}
+                  className={`p-6 rounded-2xl shadow-xl cursor-pointer backdrop-blur-lg bg-white/10 border transition-all duration-300 ${selectedTarget?._id === target._id ? "border-blue-400" : "border-white/20"
+                    }`}
+                  onClick={() => handleSelectTarget(target)}
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-xl font-bold">{target.name}</h3>
+                    <span
+                      className={`px-3 py-1 text-xs font-semibold rounded-full ${target.status === "UP"
+                        ? "bg-green-500/20 text-green-300"
+                        : target.status === "DOWN"
+                          ? "bg-red-500/20 text-red-300"
+                          : "bg-yellow-500/20 text-yellow-300"
                         }`}
                     >
-                      <div className="flex justify-between items-start mb-3">
-                        <h3 className="text-xl font-bold">{target.name}</h3>
-                        <span
-                          className={`px-3 py-1 text-xs font-semibold rounded-full ${target.status === "UP"
-                            ? "bg-green-500/20 text-green-300"
-                            : target.status === "DOWN"
-                              ? "bg-red-500/20 text-red-300"
-                              : "bg-yellow-500/20 text-yellow-300"
-                            }`}
-                        >
-                          {target.status}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-200 break-all">
-                        {target.url}
-                      </p>
-                      <div className="mt-4 pt-4 border-t border-white/20 flex justify-between items-center">
-                        <p className="text-xs text-gray-300">
-                          Schedule: <code>{target.cronSchedule}</code>
-                        </p>
-                        <div className="flex gap-4">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openEditModal(target);
-                            }}
-                            className="text-xs text-blue-300 hover:text-white"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(target._id);
-                            }}
-                            className="text-xs text-red-400 hover:text-red-300"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
+                      {target.status}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-200 break-all">{target.url}</p>
+                  <div className="mt-4 pt-4 border-t border-white/20 flex justify-between items-center">
+                    <p className="text-xs text-gray-300">
+                      Schedule: <code>{target.cronSchedule}</code>
+                    </p>
+                    <div className="flex gap-4">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditModal(target);
+                        }}
+                        className="text-xs text-blue-300 hover:text-white"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(target._id);
+                        }}
+                        className="text-xs text-red-400 hover:text-red-300"
+                      >
+                        Delete
+                      </button>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 backdrop-blur-xl bg-white/10 rounded-2xl shadow-lg">
-                  <p className="text-lg text-gray-200">
-                    🚀 You haven't added any targets yet. Use the form above to
-                    get started!
-                  </p>
-                </div>
-              )
-            )}
-          </section>
-
-          {/* History */}
-          {selectedTarget && (
-            <section>
-              <h2 className="text-3xl font-bold mb-6">
-                History for:{" "}
-                <span className="text-yellow-300">{selectedTarget.name}</span>
-              </h2>
-              <div className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-2xl shadow-xl max-h-96 overflow-y-auto">
-                {isHistoryLoading ? (
-                  <p className="p-6 text-center">Loading history...</p>
-                ) : (
-                  <table className="w-full text-sm text-left text-gray-200">
-                    <thead className="text-xs text-gray-300 uppercase bg-white/10 sticky top-0">
-                      <tr>
-                        <th className="px-6 py-3">Status</th>
-                        <th className="px-6 py-3">Timestamp</th>
-                        <th className="px-6 py-3">Response Time (ms)</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {historyData.length > 0 ? (
-                        historyData.map((ping) => (
-                          <tr
-                            key={ping._id}
-                            className="border-b border-white/10 hover:bg-white/10"
-                          >
-                            <td className="px-6 py-4">
-                              <span
-                                className={`px-2 py-1 text-xs font-semibold rounded-full ${ping.status === "UP"
-                                  ? "bg-green-500/20 text-green-300"
-                                  : "bg-red-500/20 text-red-300"
-                                  }`}
-                              >
-                                {ping.status}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4">
-                              {new Date(ping.createdAt).toLocaleString()}
-                            </td>
-                            <td className="px-6 py-4">{ping.responseTime}</td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="3" className="text-center p-6">
-                            No history found for this target.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            </section>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 backdrop-blur-xl bg-white/10 rounded-2xl shadow-lg">
+              <p className="text-lg text-gray-200">
+                🚀 You haven't added any targets yet. Use the form above to get started!
+              </p>
+            </div>
           )}
-        </div>
+        </section>
+
+        {/* History */}
+        {selectedTarget && (
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <h2 className="text-3xl font-bold mb-6">
+              History for: <span className="text-yellow-300">{selectedTarget.name}</span>
+            </h2>
+            <Card className="bg-white/10 border-white/20 backdrop-blur-lg text-white">
+              <CardContent className="p-6">
+                {isHistoryLoading ? (
+                  <p>Loading history...</p>
+                ) : historyData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <LineChart data={historyData}>
+                      <XAxis
+                        dataKey="createdAt"
+                        tickFormatter={(t) => new Date(t).toLocaleTimeString()}
+                        stroke="#ccc"
+                      />
+                      <YAxis stroke="#ccc" />
+                      <Tooltip labelFormatter={(l) => new Date(l).toLocaleString()} />
+                      <Line
+                        type="monotone"
+                        dataKey="responseTime"
+                        stroke="#38bdf8"
+                        strokeWidth={2}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <p>No history found for this target.</p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.section>
+        )}
       </main>
 
       {/* Edit Modal */}
