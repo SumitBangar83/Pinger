@@ -1,0 +1,12 @@
+# Dependencies 
+pinger-backend/node_modules/
+pinger-frontend/node_modules/
+
+# Environment variables
+pinger-backend/.env
+pinger-frontend/.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
