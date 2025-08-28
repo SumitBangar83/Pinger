@@ -1,0 +1,32 @@
+/* Simple scrollbar styling for the time picker */
+.no-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.no-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+.no-scrollbar::-webkit-scrollbar-thumb {
+    background: #a78bfa;
+    /* purple-400 */
+    border-radius: 4px;
+}
+
+.no-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #8b5cf6;
+    /* purple-500 */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+    /* For Chrome, Safari, and Opera */
+}
+
+/* For IE, Edge, and Firefox */
+.no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}

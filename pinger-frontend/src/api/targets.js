@@ -42,7 +42,7 @@ export const updateTarget = async (id, targetData) => {
 };
 
 // Target ki ping history fetch karne ke liye function (ADD THIS)
-export const getTargetHistory = async (id) => {
-    const response = await apiClient.get(`/targets/${id}/history`);
+export const getTargetHistory = async (id, days = 7) => { // Default to 7 days
+    const response = await apiClient.get(`/targets/${id}/history?days=${days}`);
     return response.data;
 };

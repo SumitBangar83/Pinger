@@ -5,7 +5,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoutes';
 import PingerApp from './pages/PingerApp';
-
+import './components/css/Dashboard.css'
 function App() {
   return (
     <Routes>
