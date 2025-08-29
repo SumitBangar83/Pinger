@@ -1,55 +1,48 @@
-// src/services/scheduler.service.js
-
 import cron from 'node-cron';
 import axios from 'axios';
 import { Target } from '../models/target.model.js';
 import { Ping } from '../models/ping.model.js';
+
 const scheduledJobs = new Map();
 
 const pingTarget = async (target) => {
-  const startTime = Date.now(); // Record start time
+  const startTime = Date.now();
 
   try {
     const response = await axios.get(target.url, { timeout: 10000 });
-    const responseTime = Date.now() - startTime; // Calculate response time
+    const responseTime = Date.now() - startTime;
 
     const isSuccess = response.data && response.data.success === true;
     const currentStatus = isSuccess ? 'UP' : 'DOWN';
 
-    // Update the target's status
     await Target.findByIdAndUpdate(target._id, { status: currentStatus });
 
-    // Create a new ping history record
     await Ping.create({
       target: target._id,
       status: currentStatus,
+      success: isSuccess, // <-- success field add karein
       statusCode: response.status,
       responseTime,
     });
-
-    console.log(`✅ PINGED: ${target.name} | Status: ${currentStatus} | Response Time: ${responseTime}ms`);
+    console.log(`✅ PINGED: ${target.name} | Status: ${currentStatus}`);
 
   } catch (error) {
     const responseTime = Date.now() - startTime;
-    const statusCode = error.response ? error.response.status : null;
 
-    // Update the target's status to DOWN
     await Target.findByIdAndUpdate(target._id, { status: 'DOWN' });
 
-    // Create a new ping history record for the failure
     await Ping.create({
       target: target._id,
       status: 'DOWN',
-      statusCode,
+      success: false, // <-- yahan bhi success field add karein
+      statusCode: error.response ? error.response.status : null,
       responseTime,
       errorMessage: error.message,
     });
-
     console.error(`❌ FAILED: Pinging ${target.name}. Error: ${error.message}`);
   }
 };
 
-// NAYA FUNCTION: Ek naye target ke liye job schedule karne ke liye
 export const addJob = (target) => {
   if (cron.validate(target.cronSchedule)) {
     const job = cron.schedule(target.cronSchedule, () => {
@@ -79,12 +72,27 @@ export const updateJob = (target) => {
   console.log(`JOB UPDATED: for target ${target.name}`);
 };
 
-// PURANA FUNCTION (thoda modified)
+// This function is now updated
 export const startScheduler = async () => {
   console.log('🚀 Starting scheduler...');
+
+  // --- SELF-PINGING LOGIC ---
+  const selfUrl = process.env.SELF_URL;
+  if (selfUrl) {
+    cron.schedule('*/1 * * * *', () => {
+      // Change the URL here to include /serverCheck
+      axios.get(`${selfUrl}/serverCheck`)
+        .then(response => console.log(`[LOG] Self-ping successful. Status: ${response.status}`))
+        .catch(error => console.error(`[ERROR] Self-ping failed: ${error.message}`));
+    });
+    console.log(`Self-pinging job scheduled for ${selfUrl}/serverCheck`);
+  }
+  // --- END OF SELF-PINGING LOGIC ---
+
+  // Fetches user-defined targets from the database and schedules them
   const activeTargets = await Target.find({ isActive: true });
   activeTargets.forEach((target) => {
-    addJob(target); // Ab hum addJob function ka use kar rahe hain
+    addJob(target);
   });
-  console.log(`Scheduler started with ${scheduledJobs.size} jobs.`);
+  console.log(`Scheduler started with ${scheduledJobs.size} user-defined jobs.`);
 };

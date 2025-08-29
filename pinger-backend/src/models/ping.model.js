@@ -2,29 +2,31 @@ import mongoose, { Schema } from 'mongoose';
 
 const pingSchema = new Schema(
   {
-    // A reference to the Target this ping belongs to
     target: {
       type: Schema.Types.ObjectId,
-      ref: 'Target', // This tells Mongoose to link to the 'Target' model
+      ref: 'Target',
       required: true,
-      index: true, // Index for faster queries
+      index: true,
     },
     status: {
       type: String,
       enum: ['UP', 'DOWN'],
       required: true,
     },
+    success: { // <-- YEH NAYA FIELD ADD KAREIN
+      type: Boolean,
+    },
     statusCode: {
-      type: Number, // e.g., 200, 404, 500
+      type: Number,
     },
     responseTime: {
-      type: Number, // Time in milliseconds
+      type: Number,
     },
     errorMessage: {
-      type: String, // Store error message if the ping fails
+      type: String,
     },
   },
-  { timestamps: true } // Adds createdAt and updatedAt
+  { timestamps: true }
 );
 
 export const Ping = mongoose.model('Ping', pingSchema);
