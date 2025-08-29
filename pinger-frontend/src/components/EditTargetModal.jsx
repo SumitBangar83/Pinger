@@ -4,6 +4,7 @@ import CustomDropdown from './ui/CustomDropdown';
 import { isValidCron } from 'cron-validator';
 import CustomDateTimePicker from './ui/CustomDateTimePicker';
 
+
 const EditTargetModal = ({ isOpen, onClose, target, onTargetUpdated }) => {
     const [name, setName] = useState('');
     const [url, setUrl] = useState('');
@@ -91,7 +92,7 @@ const EditTargetModal = ({ isOpen, onClose, target, onTargetUpdated }) => {
                             <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Friendly Name" className='placeholder-gray-800 border-purple-500 mt-8 mb-8 focus:border-purple-700 border-2 rounded-lg w-full h-10 pl-2 text-md focus:outline-none' required />
                             <input type="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="URL" className='placeholder-gray-800 border-purple-500 mt-8 mb-8 focus:border-purple-700 border-2 rounded-lg w-full h-10 pl-2 text-md focus:outline-none' required />
                         </div>
-                        <div className='flex flex-col md:flex-row gap-4 md:gap-10'>
+                        <div className='flex flex-col md:flex-row gap-4 md:gap-10 '>
                             <CustomDropdown
                                 options={selectRepeatnessType}
                                 defaultValue={scheduleType.charAt(0).toUpperCase() + scheduleType.slice(1)}
@@ -101,7 +102,7 @@ const EditTargetModal = ({ isOpen, onClose, target, onTargetUpdated }) => {
                                 {scheduleType === 'minutes' && <CustomDropdown options={scheduleOptionsMinutes} defaultValue={`Every ${scheduleValue} Minutes`} onChange={(val) => setScheduleValue(val)} />}
                                 {scheduleType === 'hours' && <CustomDropdown options={scheduleOptionsHours} defaultValue={`Every ${scheduleValue} Hour(s)`} onChange={(val) => setScheduleValue(val)} />}
                                 {scheduleType === 'exact' && <CustomDateTimePicker value={scheduleValue} onChange={(val) => setScheduleValue(val)} isEditMode={true} layout="horizontal" />}
-                                {scheduleType === 'custom' && <input type="text" value={scheduleValue} onChange={(e) => setScheduleValue(e.target.value)} className='border-purple-500 mt-8 focus:border-purple-700 border-2 rounded-lg w-full h-10 px-2 text-md focus:outline-none' placeholder='* * * * *' required />}
+                                {scheduleType === 'custom' && <input type="text" value={scheduleValue} onChange={(e) => setScheduleValue(e.target.value)} className='border-purple-500 focus:border-purple-700 border-2 rounded-lg w-full h-10 px-2 text-md focus:outline-none' placeholder='* * * * *' required />}
                             </div>
                         </div>
                         <div className="text-xs text-gray-500 mt-4 mb-4 h-4">{scheduleDescription && <span>Schedule: <span className="font-semibold text-gray-600">{scheduleDescription}</span></span>}</div>
